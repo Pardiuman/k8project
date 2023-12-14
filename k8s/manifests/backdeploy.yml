@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask
+spec:
+  selector:
+    matchLabels:
+      app: flask
+  template:
+    metadata:
+      labels:
+        app: flask
+    spec:
+      containers:
+      - name: flask
+        image: pardiuman/appres
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 256m
+            memory: 128Mi
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5000
+        envFrom:
+          - secretRef: 
+              name: mysql-secret
+        env:
+          - name: MYSQL_HOST
+            # value: "10.97.186.74"
+            value: db-service-original
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+spec:
+  selector:
+    app: flask
+  ports:
+  - port: 80
+    targetPort: 5000
+    nodePort: 30123
+  type: NodePort
+

@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  initdb.sql: |
+    CREATE DATABASE IF NOT EXISTS customdb;
+    USE customdb;
+    CREATE TABLE IF NOT EXISTS messages (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      message TEXT
+    );
+    insert into messages (message) values("k8s");
+    insert into messages (message) values("helm bhi to krna");
+
+kind: ConfigMap
+metadata:
+  name: {{ .Values.cm.name }}

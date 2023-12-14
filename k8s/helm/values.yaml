@@ -1,0 +1,33 @@
+backend:
+  name: flask
+  replicas: 2
+  label: flask-deploy
+  imagepullpolicy: IfNotPresent
+  containerPort: 5000
+  service:
+    name: backend-service
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+    nodePort: 30123
+
+db:
+  name: mysql
+  label: mysql-deploy
+  containerPort: 3306
+  service:
+    name: db-service
+    port: 3306
+    targetPort: 3306
+
+
+secret:
+  name: mysql-secret
+
+pvc:
+  name: mysqldata
+  requestStorage: 4Gi
+  storageClassName: standard
+
+cm:
+  name: mysqlcm

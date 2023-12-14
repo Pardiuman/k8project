@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      # initContainers:
+      #   - name: initdb
+      #     image: mysql
+      #     command: ["sh","-c"]
+      #     args: ["mysql -h init-service -u user --password=pass customdb  < /sql/table.sql"]
+      #     # command: ["sh","-c","printenv; cat /sql/table.sql"]
+      #     volumeMounts:
+      #       - name: mysql-data                # used to mount original data of mysql
+      #         mountPath: /var/lib/mysql/
+      #       - name: mysql-create-table        # used to mount table.sql file 
+      #         mountPath: /sql
+      #     ports:
+      #       - containerPort: 123
+      #     envFrom:
+      #       - secretRef:
+      #           name: mysql-secret 
+      containers:
+        - name: db
+          image: mysql
+          ports:
+          - containerPort: 3306
+          # command: ["sh","-c"]
+          # args: 
+          #   - "mysql -u user --password=pass customdb  < /sql/table.sql"
+            # - "mysql -h db-service -u user --password=pass customdb -e show tables;"
+          envFrom:
+            - secretRef:
+                name: mysql-secret
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql/
+            - name: mysql-create-table
+              mountPath: /docker-entrypoint-initdb.d
+            
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: mysql-create-table
+          configMap:
+            name: mysql-cm
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service-original
+spec:
+  selector:
+    app: db
+  ports:
+  - port: 3306
+    targetPort: 3306
+
+
